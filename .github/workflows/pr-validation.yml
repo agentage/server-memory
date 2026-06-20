@@ -20,14 +20,14 @@ jobs:
 
     steps:
       - name: Checkout mcp-memory
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           path: mcp-memory
 
       # @agentage/memory-core is a local file: dependency until it publishes to npm,
       # so build it as a sibling here (memory-core is a public repo, default token reads it).
       - name: Checkout memory-core (engine dependency)
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: agentage/memory-core
           ref: master
