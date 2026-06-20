@@ -10,9 +10,9 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { call } from './fixtures/mcp.js';
 
 // The whole point: it works out of the box. `init` scaffolds ~/.agentage + a vault,
-// then `npx @agentage/mcp-memory` (here: the built bin) serves it - nothing else.
+// then `npx @agentage/server-memory` (here: the built bin) serves it - nothing else.
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
-const bin = join(repoRoot, 'dist/bin/mcp-memory.js');
+const bin = join(repoRoot, 'dist/bin/server-memory.js');
 const tmps: string[] = [];
 const mk = (p: string) => {
   const d = mkdtempSync(join(tmpdir(), p));
@@ -22,11 +22,8 @@ const mk = (p: string) => {
 
 describe('e2e: init, then the stdio server just works', () => {
   beforeAll(() => {
-    // build memory-core (the file: dep) + this package so the spawned bin can run.
-    execFileSync('npm', ['run', 'build'], {
-      cwd: join(repoRoot, '../memory-core'),
-      stdio: 'ignore',
-    });
+    // @agentage/memory-core resolves from npm (a normal dependency); just build this
+    // package so the spawned bin exists.
     execFileSync('npm', ['run', 'build'], { cwd: repoRoot, stdio: 'ignore' });
   }, 60_000);
 

@@ -1,4 +1,4 @@
-# @agentage/mcp-memory
+# @agentage/server-memory
 
 The **MCP server** for agentage Memory: exposes your local vaults
 (`~/.agentage/vaults.json`, read through [`@agentage/memory-core`](https://github.com/agentage/memory-core))
@@ -14,10 +14,10 @@ All memory logic (backends, git, search, routing) lives in `@agentage/memory-cor
 ```bash
 # one-time, offline: scaffold ~/.agentage + a starter vault
 #   (memory-core's `init`, also surfaced by the agentage CLI)
-npx @agentage/mcp-memory          # serves ~/.agentage/vaults.json over stdio
+npx @agentage/server-memory          # serves ~/.agentage/vaults.json over stdio
 ```
 
-Point any stdio MCP client (Windsurf, Zed, Claude Desktop) at `npx @agentage/mcp-memory`.
+Point any stdio MCP client (Windsurf, Zed, Claude Desktop) at `npx @agentage/server-memory`.
 
 ## Reused by the CLI daemon
 
@@ -25,7 +25,7 @@ The server builder is transport-agnostic, so the agentage CLI reuses the exact s
 pieces and only swaps the transport:
 
 ```ts
-import { createMemoryServer, loadLocalServer } from '@agentage/mcp-memory';
+import { createMemoryServer, loadLocalServer } from '@agentage/server-memory';
 
 // stdio bin:        await (await loadLocalServer()).connect(new StdioServerTransport());
 // CLI daemon:       const server = createMemoryServer(registry, { scope: 'local' });

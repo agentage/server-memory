@@ -1,6 +1,6 @@
 name: Publish Package
 
-# Publishes @agentage/mcp-memory to npm. Manual (workflow_dispatch) or on a release
+# Publishes @agentage/server-memory to npm. Manual (workflow_dispatch) or on a release
 # commit to master; never on an ordinary push. Requires an NPM_TOKEN repo secret.
 # (The first publish was bootstrapped manually; --provenance is safe now the pkg exists.)
 
