@@ -4,11 +4,13 @@
   "description": "The MCP server for agentage Memory: exposes @agentage/memory-core vaults as the frozen 6 memory__* tools over stdio. The open, cross-vendor counterpart to @modelcontextprotocol/server-memory.",
   "type": "module",
   "license": "UNLICENSED",
-  "private": true,
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": "./dist/index.js"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "bin": {
     "agentage-mcp-memory": "dist/bin/mcp-memory.js"
@@ -35,7 +37,7 @@
     "prepublishOnly": "npm run verify"
   },
   "dependencies": {
-    "@agentage/memory-core": "file:../memory-core",
+    "@agentage/memory-core": "^0.0.1",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "zod": "^4.4.3"
   },
