@@ -19,51 +19,29 @@ jobs:
     timeout-minutes: 10
 
     steps:
-      - name: Checkout mcp-memory
-        uses: actions/checkout@v7
-        with:
-          path: mcp-memory
-
-      # @agentage/memory-core is a local file: dependency until it publishes to npm,
-      # so build it as a sibling here (memory-core is a public repo, default token reads it).
-      - name: Checkout memory-core (engine dependency)
-        uses: actions/checkout@v7
-        with:
-          repository: agentage/memory-core
-          ref: master
-          path: memory-core
+      - name: Checkout code
+        uses: actions/checkout@v6
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: '22'
           cache: 'npm'
-          cache-dependency-path: mcp-memory/package-lock.json
-
-      - name: Build engine dependency
-        working-directory: memory-core
-        run: npm ci && npm run build
 
       - name: Install dependencies
-        working-directory: mcp-memory
         run: npm ci
 
       - name: Type check
-        working-directory: mcp-memory
         run: npm run type-check
 
       - name: Lint
-        working-directory: mcp-memory
         run: npm run lint
 
       - name: Format check
-        working-directory: mcp-memory
         run: npm run format:check
 
       - name: Test with coverage
-        working-directory: mcp-memory
         run: npm run test:coverage
 
       - name: Build
-        working-directory: mcp-memory
         run: npm run build

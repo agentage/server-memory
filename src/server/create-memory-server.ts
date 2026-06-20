@@ -9,6 +9,8 @@ export const SERVER_VERSION = '0.0.1';
 export interface CreateServerOptions {
   scope: McpScope; // which vaults to surface: only those whose mcp includes this scope
   version?: string;
+  readOnly?: boolean; // expose only search/read/list (hide write/edit/delete)
+  only?: string; // surface just this one vault id
 }
 
 const instructionsFor = (vaultIds: string[]): string => {
@@ -27,7 +29,8 @@ const instructionsFor = (vaultIds: string[]): string => {
 // vaults (those whose mcp scope includes opts.scope). Transport-agnostic: connect
 // it to a stdio or Streamable-HTTP transport. The vault router federates per-call.
 export const createMemoryServer = (reg: VaultRegistry, opts: CreateServerOptions): McpServer => {
-  const surfaced = reg.surfaced(opts.scope);
+  const scoped = reg.surfaced(opts.scope);
+  const surfaced = opts.only ? scoped.filter((h) => h.id === opts.only) : scoped;
   const fallbackDefault = reg.default();
   const defaultHandle = surfaced.find((h) => h.id === fallbackDefault?.id) ?? surfaced[0];
   const router = createRouter(surfaced, defaultHandle);
@@ -40,6 +43,6 @@ export const createMemoryServer = (reg: VaultRegistry, opts: CreateServerOptions
     },
     { capabilities: { tools: {} }, instructions: instructionsFor(surfaced.map((h) => h.id)) }
   );
-  registerTools(server, router);
+  registerTools(server, router, { readOnly: opts.readOnly });
   return server;
 };

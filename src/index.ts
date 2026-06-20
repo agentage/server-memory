@@ -1,4 +1,4 @@
-// @agentage/mcp-memory public API - the MCP layer over @agentage/memory-core.
+// @agentage/server-memory public API - the MCP layer over @agentage/memory-core.
 export { MEMORY_TOOLS, type MemoryToolDef } from './server/memory-tools.schema.js';
 export {
   createMemoryServer,

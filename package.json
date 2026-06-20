@@ -1,9 +1,13 @@
 {
-  "name": "@agentage/mcp-memory",
+  "name": "@agentage/server-memory",
   "version": "0.0.1",
-  "description": "The MCP server for agentage Memory: exposes @agentage/memory-core vaults as the frozen 6 memory__* tools over stdio. The open, cross-vendor counterpart to @modelcontextprotocol/server-memory.",
+  "description": "The agentage Memory MCP server: exposes your local vaults as the frozen 6 memory__* tools over stdio. The open, cross-vendor counterpart to @modelcontextprotocol/server-memory.",
   "type": "module",
   "license": "UNLICENSED",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agentage/server-memory.git"
+  },
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
@@ -13,7 +17,7 @@
     "access": "public"
   },
   "bin": {
-    "agentage-mcp-memory": "dist/bin/mcp-memory.js"
+    "agentage-server-memory": "dist/bin/server-memory.js"
   },
   "files": [
     "dist"
@@ -37,7 +41,7 @@
     "prepublishOnly": "npm run verify"
   },
   "dependencies": {
-    "@agentage/memory-core": "^0.0.1",
+    "@agentage/memory-core": "^0.1.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "zod": "^4.4.3"
   },

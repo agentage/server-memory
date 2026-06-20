@@ -54,9 +54,18 @@ const guard = async (fn: () => Promise<CallToolResult>): Promise<CallToolResult>
   }
 };
 
+export interface RegisterOptions {
+  readOnly?: boolean; // skip the mutating tools (write/edit/delete)
+}
+
 // Register the frozen 6-tool surface onto the federated router. write/edit return
 // {path,updated} (the commit SHA is internal, stripped); errors surface as isError.
-export const registerTools = (server: McpServer, router: Router): void => {
+// With readOnly, only search/read/list are registered.
+export const registerTools = (
+  server: McpServer,
+  router: Router,
+  opts: RegisterOptions = {}
+): void => {
   server.registerTool('memory__search', toolConfig('memory__search'), (args) =>
     guard(async () => {
       const query = args as unknown as SearchQuery;
@@ -80,6 +89,8 @@ export const registerTools = (server: McpServer, router: Router): void => {
       return ok(result, renderList(query, result));
     })
   );
+
+  if (opts.readOnly) return;
 
   server.registerTool('memory__write', toolConfig('memory__write'), (args) =>
     guard(async () => {
