@@ -1,0 +1,45 @@
+{
+  "name": "@agentage/mcp-memory",
+  "version": "0.0.1",
+  "description": "The MCP server for agentage Memory: exposes @agentage/memory-core vaults as the frozen 6 memory__* tools over stdio (and HTTP). The open, cross-vendor counterpart to @modelcontextprotocol/server-memory.",
+  "type": "module",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": "./dist/index.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "eslint src test",
+    "format:check": "prettier --check \"src/**/*.ts\" \"test/**/*.ts\"",
+    "verify": "npm run type-check && npm run lint && npm run format:check && npm run test && npm run build"
+  },
+  "dependencies": {
+    "@agentage/memory-core": "file:../memory-core",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.0.0",
+    "@types/node": "^22.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^9.1.0",
+    "globals": "^15.0.0",
+    "prettier": "^3.3.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  }
+}
