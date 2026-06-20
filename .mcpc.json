@@ -1,0 +1,527 @@
+{
+  "protocol": "mcp/streamable-http",
+  "version": 1,
+  "tools": [
+    {
+      "name": "memory__search",
+      "title": "Search memory",
+      "description": "Find memories by literal text, ranked by match count. Matches the query as ONE case-insensitive substring (not semantic, not tokenized) across titles/bodies/tags - so search a SINGLE keyword, not a phrase. Returns path+snippet+score (score = number of matches, not a relevance %), never full bodies. Use when you have a keyword to rank by; to browse the folder tree instead, use memory__list. Zero hits? try a synonym.",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Literal text to find (case-insensitive). Matched as ONE exact substring across titles/bodies/tags - not semantic, not split into words - so a multi-word query matches only that exact phrase; search a SINGLE distinctive keyword. e.g. pkce"
+          },
+          "folder": {
+            "type": "string",
+            "maxLength": 1024,
+            "description": "Folder, POSIX, no leading slash (trailing slash optional), e.g. work/tasks. Matches that folder only - not a string prefix. Omit = whole memory"
+          },
+          "tags": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "description": "Tags to filter by (frontmatter tags: or inline #tag), AND-matched (all must be present), case-sensitive, bare without #. e.g. [project, active]. Omit = no tag filter"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "description": "Optional. Max results in this page; defaults to 20, capped at 50."
+          },
+          "cursor": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Opaque pagination token - pass the previous response's nextCursor here verbatim for the next page. Omit for the first page; never construct or edit it."
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "results": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "snippet": {
+                  "type": "string"
+                },
+                "score": {
+                  "type": "number"
+                },
+                "updated": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "path",
+                "title",
+                "snippet",
+                "score",
+                "updated"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "nextCursor": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "results"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "memory__read",
+      "title": "Read memory",
+      "description": "Read ONE memory by its exact path: returns full frontmatter + body. Use a path you got from memory__search/list, a prior write/edit, or the user - do not invent or guess one from a title. No known path? use memory__search first.",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Exact POSIX .md address - not a title or search query. Case-sensitive, no leading slash. e.g. work/tasks/foo.md"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "frontmatter": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {}
+          },
+          "body": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "updated": {
+            "type": "string"
+          },
+          "deleted": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "path",
+          "title",
+          "frontmatter",
+          "body",
+          "tags",
+          "updated",
+          "deleted"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "memory__list",
+      "title": "Browse memory",
+      "description": "Browse the memory as a folder tree: the files and subfolders under a folder, 2 levels deep by default, with per-folder file counts - no bodies, no ranking. Use to see what exists and how it is organized, or to list every note carrying a tag (tags filter); have a keyword to rank by instead? use memory__search. A folder shown without its own entries has more inside: call memory__list again with that folder. Folders over the per-folder entry limit are flagged truncated and not expanded - browse them directly or narrow with memory__search.",
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "openWorldHint": false
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "folder": {
+            "type": "string",
+            "maxLength": 1024,
+            "description": "Folder, POSIX, no leading slash (trailing slash optional), e.g. work/tasks. Matches that folder only - not a string prefix. Omit = whole memory"
+          },
+          "depth": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2,
+            "description": "Optional. 1 = direct children of the folder only; 2 (default) = also expand each subfolder one more level."
+          },
+          "tags": {
+            "maxItems": 50,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 128
+            },
+            "description": "Tags to filter by (frontmatter tags: or inline #tag), AND-matched (all must be present), case-sensitive, bare without #. e.g. [project, active]. Omit = no tag filter"
+          }
+        },
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "folder": {
+            "type": "string",
+            "description": "The browsed folder, normalized; empty = memory root"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "oneOf": [
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "file"
+                    },
+                    "path": {
+                      "type": "string"
+                    },
+                    "title": {
+                      "type": "string"
+                    },
+                    "updated": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "path",
+                    "title",
+                    "updated"
+                  ],
+                  "additionalProperties": false
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "type": {
+                      "type": "string",
+                      "const": "folder"
+                    },
+                    "path": {
+                      "type": "string"
+                    },
+                    "files": {
+                      "type": "number",
+                      "description": "Recursive file count inside this folder"
+                    },
+                    "truncated": {
+                      "type": "boolean",
+                      "description": "True = this folder was NOT expanded (over the per-folder entry limit or the response budget); call memory__list with this folder path to see inside"
+                    },
+                    "entries": {
+                      "type": "array",
+                      "items": {
+                        "oneOf": [
+                          {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "const": "file"
+                              },
+                              "path": {
+                                "type": "string"
+                              },
+                              "title": {
+                                "type": "string"
+                              },
+                              "updated": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "path",
+                              "title",
+                              "updated"
+                            ],
+                            "additionalProperties": false
+                          },
+                          {
+                            "type": "object",
+                            "properties": {
+                              "type": {
+                                "type": "string",
+                                "const": "folder"
+                              },
+                              "path": {
+                                "type": "string"
+                              },
+                              "files": {
+                                "type": "number",
+                                "description": "Recursive file count inside this folder"
+                              },
+                              "truncated": {
+                                "type": "boolean",
+                                "description": "True = this folder was NOT expanded (over the per-folder entry limit or the response budget); call memory__list with this folder path to see inside"
+                              }
+                            },
+                            "required": [
+                              "type",
+                              "path",
+                              "files"
+                            ],
+                            "additionalProperties": false
+                          }
+                        ]
+                      },
+                      "description": "Direct children, present when this folder is expanded (within depth and limits)"
+                    }
+                  },
+                  "required": [
+                    "type",
+                    "path",
+                    "files"
+                  ],
+                  "additionalProperties": false
+                }
+              ]
+            }
+          },
+          "truncated": {
+            "type": "boolean",
+            "description": "True = something was omitted anywhere in this response (a folder over the per-folder limit, or the response budget); narrow with a subfolder or memory__search"
+          },
+          "files": {
+            "type": "number",
+            "description": "Total files under the browsed folder (after the tags filter)"
+          }
+        },
+        "required": [
+          "folder",
+          "entries",
+          "truncated",
+          "files"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "memory__write",
+      "title": "Write memory",
+      "description": "Create a NEW memory or fully OVERWRITE an existing one at path - replaces the entire body and frontmatter (idempotent; the saved memory persists for every AI). Use when you have the complete final content. To change only part of an existing memory, use memory__edit. Store durable knowledge and notes only - never secrets, passwords, API keys, one-time codes, or payment/government identifiers (these are refused).",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Exact POSIX .md address - not a title or search query. Case-sensitive, no leading slash. e.g. work/tasks/foo.md"
+          },
+          "body": {
+            "type": "string",
+            "description": "The complete Markdown body, excluding frontmatter (no --- fences). write overwrites the entire existing body."
+          },
+          "frontmatter": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {},
+            "description": "YAML metadata as a key->value map (no --- fences), e.g. {\"type\":\"task\",\"status\":\"active\",\"tags\":[\"project\"]}. write replaces the whole map; edit shallow-merges top-level keys (nested values replaced wholesale; a key cannot be removed via edit - use write to fully replace)"
+          }
+        },
+        "required": [
+          "path",
+          "body"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "updated": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "updated"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "memory__edit",
+      "title": "Edit memory",
+      "description": "Amend an EXISTING memory in place: mode=str_replace swaps one exact text match (old_str -> new_str) without resending the note - the default choice for small changes; append adds to the end; replace overwrites the whole body; frontmatter shallow-merges. Fails with not-found if the path does not exist - use memory__write to create. Do not introduce secrets, passwords, API keys, one-time codes, or payment/government identifiers (these are refused).",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Exact POSIX .md address - not a title or search query. Case-sensitive, no leading slash. e.g. work/tasks/foo.md"
+          },
+          "body": {
+            "type": "string",
+            "description": "Markdown body, excluding frontmatter (no --- fences). With mode=replace it becomes the new body; with mode=append it is added to the end. Not used with mode=str_replace. Omit to change only frontmatter."
+          },
+          "frontmatter": {
+            "type": "object",
+            "propertyNames": {
+              "type": "string"
+            },
+            "additionalProperties": {},
+            "description": "YAML metadata as a key->value map (no --- fences), e.g. {\"type\":\"task\",\"status\":\"active\",\"tags\":[\"project\"]}. write replaces the whole map; edit shallow-merges top-level keys (nested values replaced wholesale; a key cannot be removed via edit - use write to fully replace)"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "replace",
+              "append",
+              "str_replace"
+            ],
+            "description": "Optional. \"str_replace\" swaps old_str for new_str in place; \"append\" adds body to the end; omit or \"replace\" overwrites the whole body. Frontmatter always shallow-merges regardless."
+          },
+          "old_str": {
+            "type": "string",
+            "minLength": 1,
+            "description": "mode=str_replace only. The exact existing body text to replace - must match verbatim (including whitespace) and appear exactly once. Read the memory first to copy it."
+          },
+          "new_str": {
+            "type": "string",
+            "description": "mode=str_replace only. The replacement text. Omit to delete old_str."
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "updated": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "path",
+          "updated"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "memory__delete",
+      "title": "Delete memory",
+      "description": "Soft-delete (forget) a memory by path; recoverable from git history. Returns not-found if the path does not exist. To remove only part of a memory, use memory__edit.",
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      },
+      "inputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024,
+            "description": "Exact POSIX .md address - not a title or search query. Case-sensitive, no leading slash. e.g. work/tasks/foo.md"
+          }
+        },
+        "required": [
+          "path"
+        ],
+        "additionalProperties": false
+      },
+      "outputSchema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "deleted": {
+            "type": "boolean",
+            "const": true
+          }
+        },
+        "required": [
+          "path",
+          "deleted"
+        ],
+        "additionalProperties": false
+      }
+    }
+  ]
+}
