@@ -2,7 +2,7 @@ name: Publish Package
 
 # Publishes @agentage/mcp-memory to npm. Manual (workflow_dispatch) or on a release
 # commit to master; never on an ordinary push. Requires an NPM_TOKEN repo secret.
-# (No --provenance: it 404s a first-ever publish; add it back once the package exists.)
+# (The first publish was bootstrapped manually; --provenance is safe now the pkg exists.)
 
 on:
   push:
@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 env:
   NODE_VERSION: '22'
@@ -70,7 +71,7 @@ jobs:
       - if: steps.ver.outputs.publish == 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish --access public
+        run: npm publish --access public --provenance
       - if: steps.ver.outputs.publish == 'true'
         run: |
           git config user.name "github-actions[bot]"
