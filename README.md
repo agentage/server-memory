@@ -1,6 +1,6 @@
 # @agentage/server-memory
 
-The **MCP server** for agentage Memory: exposes your local vaults
+The **MCP server** for agentage Memory exposes your local vaults
 (`~/.agentage/vaults.json`, read through [`@agentage/memory-core`](https://github.com/agentage/memory-core))
 as the frozen 6 `memory__*` tools over stdio. The open, cross-vendor counterpart to
 `@modelcontextprotocol/server-memory`.
