@@ -1,6 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 import {
+  RestrictedContentError,
   UnknownVaultError,
   type EditInput,
   type ListQuery,
@@ -44,12 +45,15 @@ const notFound = (
   hint = 'Use memory__search to find the right path, or memory__list to browse.'
 ): CallToolResult => isError(`No memory at path "${path}". ${hint}`);
 
-// Map an UnknownVaultError to a tool error; let other throws propagate to the SDK.
+// Map an unknown-vault or restricted-content refusal to a tool error (the engine's
+// write/edit path refuses secrets); let other throws propagate to the SDK.
 const guard = async (fn: () => Promise<CallToolResult>): Promise<CallToolResult> => {
   try {
     return await fn();
   } catch (e) {
-    if (e instanceof UnknownVaultError) return isError(e.message);
+    if (e instanceof UnknownVaultError || e instanceof RestrictedContentError) {
+      return isError(e.message);
+    }
     throw e;
   }
 };
