@@ -41,7 +41,7 @@
     "prepublishOnly": "npm run verify"
   },
   "dependencies": {
-    "@agentage/memory-core": "^0.1.3",
+    "@agentage/memory-core": "^0.3.2",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "zod": "^4.4.3"
   },
