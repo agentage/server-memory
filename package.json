@@ -1,6 +1,6 @@
 {
   "name": "@agentage/server-memory",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "The agentage Memory MCP server: exposes your local vaults as the frozen 6 memory__* tools over stdio. The open, cross-vendor counterpart to @modelcontextprotocol/server-memory.",
   "type": "module",
   "license": "MIT",
@@ -41,7 +41,7 @@
     "prepublishOnly": "npm run verify"
   },
   "dependencies": {
-    "@agentage/memory-core": "^0.3.2",
+    "@agentage/memory-core": "^0.4.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "zod": "^4.4.3"
   },
