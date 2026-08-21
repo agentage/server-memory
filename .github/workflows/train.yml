@@ -114,7 +114,8 @@ jobs:
         run: |
           set -euo pipefail
           # L1: pull the fresh @agentage/* line (memory-core L0 released at 19:00 UTC).
-          npx --yes npm-check-updates -u --dep prod,dev --filter "@agentage/*"
+          # --target minor: majors stay a deliberate human/dependabot call, not an auto-bump.
+          npx --yes npm-check-updates -u --target minor --dep prod,dev --filter "@agentage/*"
           npm install
           if git diff --quiet -- package.json package-lock.json; then
             echo "No @agentage/* dependency changes."
