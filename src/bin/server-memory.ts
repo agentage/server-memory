@@ -7,8 +7,29 @@
 //
 // stdout is the JSON-RPC wire; all diagnostics MUST go to stderr.
 
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
-import { loadLocalServer } from '../server/local-server.js';
+const reason = (err: unknown): string => (err instanceof Error ? err.message : String(err));
+
+// Optional observability. @agentage/observability is deliberately NOT a dependency: this package is
+// run through `npx`, and the kit would triple a cold start's install. Installed alongside (global,
+// or via the agentage CLI) its bootstrap adds tool spans, wide events and crash capture; absent, it
+// is a silent skip. Either way stdout stays the JSON-RPC wire - the kit logs to stderr only, and
+// stays inert until OTEL_EXPORTER_OTLP_ENDPOINT names a collector.
+const startObservability = async (): Promise<void> => {
+  try {
+    if (!process.env.OTEL_SERVICE_NAME) process.env.OTEL_SERVICE_NAME = 'agentage-server-memory';
+    await import('@agentage/observability/bootstrap');
+  } catch (err) {
+    if (process.env.AGENTAGE_DEBUG) {
+      process.stderr.write(`[server-memory] observability off: ${reason(err)}\n`);
+    }
+  }
+};
+
+// Loaded behind the bootstrap, not at the top: the kit instruments MCP tool registration through
+// module hooks, which only see a module imported after they are registered.
+await startObservability();
+const { StdioServerTransport } = await import('@modelcontextprotocol/sdk/server/stdio.js');
+const { loadLocalServer } = await import('../server/local-server.js');
 
 const main = async (): Promise<void> => {
   const server = await loadLocalServer();
@@ -17,7 +38,6 @@ const main = async (): Promise<void> => {
 };
 
 main().catch((err: unknown) => {
-  const message = err instanceof Error ? err.message : String(err);
-  process.stderr.write(`[server-memory] fatal: ${message}\n`);
+  process.stderr.write(`[server-memory] fatal: ${reason(err)}\n`);
   process.exit(1);
 });
