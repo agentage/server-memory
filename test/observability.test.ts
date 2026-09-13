@@ -130,6 +130,14 @@ describe('optional observability never touches stdout', () => {
     );
   }, 30_000);
 
+  // The kit announces an enabled tracer on stdout (console.log, kit 1.0.0); on this process that
+  // would be a non-JSON-RPC frame mid-handshake, so the bin diverts stdout while it boots.
+  it('with a collector configured: the tracer banner lands on stderr, not the wire', async () => {
+    const run = await runBin(bin, configDir, { OTEL_EXPORTER_OTLP_ENDPOINT: 'http://127.0.0.1:9' });
+    expect(jsonRpcOnly(run.stdout)).toBe(true);
+    expect(run.stderr).toContain('otel: tracing enabled');
+  }, 30_000);
+
   it('without the kit installed: JSON-RPC on stdout, a silent skip on stderr', async () => {
     const run = await runBin(withoutKit(), configDir);
     expect(jsonRpcOnly(run.stdout)).toBe(true);

@@ -15,6 +15,11 @@ const reason = (err: unknown): string => (err instanceof Error ? err.message : S
 // is a silent skip. Either way stdout stays the JSON-RPC wire - the kit logs to stderr only, and
 // stays inert until OTEL_EXPORTER_OTLP_ENDPOINT names a collector.
 const startObservability = async (): Promise<void> => {
+  // The kit (1.0.0) announces an enabled tracer with one console.log, which on this process would
+  // land mid-handshake on the JSON-RPC wire. Divert stdout to stderr while it boots; drop this once
+  // the kit writes that line to stderr itself.
+  const stdoutWrite = process.stdout.write;
+  process.stdout.write = process.stderr.write.bind(process.stderr) as typeof process.stdout.write;
   try {
     if (!process.env.OTEL_SERVICE_NAME) process.env.OTEL_SERVICE_NAME = 'agentage-server-memory';
     await import('@agentage/observability/bootstrap');
@@ -22,6 +27,8 @@ const startObservability = async (): Promise<void> => {
     if (process.env.AGENTAGE_DEBUG) {
       process.stderr.write(`[server-memory] observability off: ${reason(err)}\n`);
     }
+  } finally {
+    process.stdout.write = stdoutWrite;
   }
 };
 
