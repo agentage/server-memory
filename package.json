@@ -46,6 +46,8 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@agentage/observability": "^1.0.0",
+    "@opentelemetry/api": "^1.9.1",
     "@types/node": "^26.1.2",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
     "@typescript-eslint/parser": "^8.18.0",

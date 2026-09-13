@@ -32,6 +32,22 @@ import { createMemoryServer, loadLocalServer } from '@agentage/server-memory';
 //                   await server.connect(new StreamableHTTPServerTransport(...));
 ```
 
+## Telemetry (optional, off by default)
+
+Nothing is collected and nothing extra is installed: `@agentage/observability` is **not** a
+dependency, because `npx @agentage/server-memory` should stay a small cold start. Install the kit
+alongside and the bin picks it up on its own - traces and one wide event per tool call:
+
+```bash
+npm i -g @agentage/observability   # or just use the agentage CLI, which ships with it
+```
+
+Absent, the server behaves exactly as before (`AGENTAGE_DEBUG=1` prints one stderr line saying the
+kit was not found). Present, it is still inert until `OTEL_EXPORTER_OTLP_ENDPOINT` names a
+collector; `OTEL_SERVICE_NAME` defaults to `agentage-server-memory`. Either way **stdout carries
+only JSON-RPC** - every kit line goes to stderr, which `test/observability.test.ts` asserts in both
+directions.
+
 ## Develop
 
 ```bash
