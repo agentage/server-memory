@@ -1,6 +1,6 @@
 {
   "name": "@agentage/server-memory",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "The agentage Memory MCP server: exposes your local vaults as the frozen 6 memory__* tools over stdio. The open, cross-vendor counterpart to @modelcontextprotocol/server-memory.",
   "type": "module",
   "license": "MIT",
@@ -46,7 +46,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
-    "@agentage/observability": "^1.0.0",
+    "@agentage/observability": "^1.2.0",
     "@opentelemetry/api": "^1.9.1",
     "@types/node": "^26.1.2",
     "@typescript-eslint/eslint-plugin": "^8.18.0",
