@@ -10,8 +10,8 @@
 const reason = (err: unknown): string => (err instanceof Error ? err.message : String(err));
 
 // Optional observability. @agentage/observability is deliberately NOT a dependency: this package is
-// run through `npx`, and the kit would triple a cold start's install. Installed alongside (global,
-// or via the agentage CLI) its bootstrap adds tool spans, wide events and crash capture; absent, it
+// run through `npx`, and the kit would triple a cold start's install. Installed alongside (e.g.
+// globally) its bootstrap adds tool spans, wide events and crash capture; absent, it
 // is a silent skip. Either way stdout stays the JSON-RPC wire - the kit logs to stderr only, and
 // stays inert until OTEL_EXPORTER_OTLP_ENDPOINT names a collector.
 const startObservability = async (): Promise<void> => {
