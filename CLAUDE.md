@@ -16,7 +16,7 @@ The stdio **MCP server** for agentage Memory: exposes local vaults as the frozen
 - The 6-tool `memory__*` contract is **frozen**. Schema + `.mcpc.json` must stay in sync.
 - `.mcpc.json` is a CI snapshot (`z.toJSONSchema`, draft-2020-12) — it disagrees with the live `tools/list` (SDK, draft-07). **Verify contract claims against a dumped live `tools/list`, never the snapshot** — snapshot-only checks go false-green.
 - Descriptions flow to BOTH serializers — the safe cross-model lever (the model routes on the description, not just the schema).
-- Transport-agnostic by design: stdio bin here; the CLI daemon reuses `createMemoryServer` over Streamable HTTP. Keep it that way.
+- Transport-agnostic by design: `createMemoryServer` takes any transport; the bin here wires stdio. Keep it that way.
 - `@agentage/memory-core` is a `file:` link until both publish — build core first (the e2e does this automatically).
 
 ## Verify

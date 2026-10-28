@@ -12,25 +12,11 @@ All memory logic (backends, git, search, routing) lives in `@agentage/memory-cor
 ## Use it
 
 ```bash
-# one-time, offline: scaffold ~/.agentage + a starter vault
-#   (memory-core's `init`, also surfaced by the agentage CLI)
+# one-time, offline: scaffold ~/.agentage + a starter vault (memory-core's `init`)
 npx @agentage/server-memory          # serves ~/.agentage/vaults.json over stdio
 ```
 
-Point any stdio MCP client (Windsurf, Zed, Claude Desktop) at `npx @agentage/server-memory`.
-
-## Reused by the CLI daemon
-
-The server builder is transport-agnostic, so the agentage CLI reuses the exact same
-pieces and only swaps the transport:
-
-```ts
-import { createMemoryServer, loadLocalServer } from '@agentage/server-memory';
-
-// stdio bin:        await (await loadLocalServer()).connect(new StdioServerTransport());
-// CLI daemon:       const server = createMemoryServer(registry, { scope: 'local' });
-//                   await server.connect(new StreamableHTTPServerTransport(...));
-```
+Point any stdio MCP client (VS Code, Windsurf, Zed, Claude Desktop) at `npx @agentage/server-memory`.
 
 ## Telemetry (optional, off by default)
 
@@ -39,7 +25,7 @@ dependency, because `npx @agentage/server-memory` should stay a small cold start
 alongside and the bin picks it up on its own - traces and one wide event per tool call:
 
 ```bash
-npm i -g @agentage/observability   # or just use the agentage CLI, which ships with it
+npm i -g @agentage/observability
 ```
 
 Absent, the server behaves exactly as before (`AGENTAGE_DEBUG=1` prints one stderr line saying the
