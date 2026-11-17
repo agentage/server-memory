@@ -37,11 +37,10 @@ directions.
 ## Develop
 
 ```bash
-npm install        # links @agentage/memory-core via file:../memory-core
+npm install        # installs @agentage/memory-core from npm
 npm test           # vitest: contract (tools/list = 6) + tools (in-memory) + e2e (init -> spawned bin -> round-trip)
 npm run verify     # type-check + lint + format:check + test + build
 ```
 
-`@agentage/memory-core` is a local `file:` link until both packages publish to npm; build
-core before running here (the e2e does this automatically). The 6-tool schema and
-`.mcpc.json` snapshot are the frozen MCP contract - keep them in sync if the contract changes.
+The 6-tool schema and `.mcpc.json` snapshot are the frozen MCP contract - keep them in sync if the
+contract changes.

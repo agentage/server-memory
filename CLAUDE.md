@@ -17,7 +17,9 @@ The stdio **MCP server** for agentage Memory: exposes local vaults as the frozen
 - `.mcpc.json` is a CI snapshot (`z.toJSONSchema`, draft-2020-12) — it disagrees with the live `tools/list` (SDK, draft-07). **Verify contract claims against a dumped live `tools/list`, never the snapshot** — snapshot-only checks go false-green.
 - Descriptions flow to BOTH serializers — the safe cross-model lever (the model routes on the description, not just the schema).
 - Transport-agnostic by design: `createMemoryServer` takes any transport; the bin here wires stdio. Keep it that way.
-- `@agentage/memory-core` is a `file:` link until both publish — build core first (the e2e does this automatically).
+- `@agentage/memory-core` is a normal npm dependency (`^0.5.0`); all memory logic stays there.
 
 ## Verify
 `npm run verify` (type-check + lint + format:check + test + build). Tests: contract (tools/list = 6) + tools (in-memory) + e2e (init → spawned bin → round-trip).
+
+Standards: `~/vaults/engineering/standards/` (start at its `README.md`); this file links them and does not copy them.
