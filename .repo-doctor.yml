@@ -1,2 +1,5 @@
 # repo-doctor config for this repo; schema in agentage/automation scripts/repo-doctor/README.md.
 class: node-lib
+waive:
+  - id: sch-dependabot-ignore
+    reason: '@agentage/memory-core majors held: 1.x is a new engine, migrate deliberately'
